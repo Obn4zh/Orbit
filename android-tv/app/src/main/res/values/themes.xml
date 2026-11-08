@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Orbit" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/orbit_bg</item>
+        <item name="android:colorAccent">@color/orbit_indigo</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+    <color name="orbit_bg">#0E0F14</color>
+    <color name="orbit_indigo">#5B5BF6</color>
+    <color name="orbit_cyan">#22C3EE</color>
+</resources>

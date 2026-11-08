@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Orbit mark on transparent background, 108dp adaptive-icon foreground safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:strokeColor="#59FFFFFF" android:strokeWidth="3.2" android:fillColor="#00000000"
+        android:pathData="M54,32a22,22 0,1 1,0 44a22,22 0,1 1,0 -44z" />
+    <path android:strokeColor="#B3FFFFFF" android:strokeWidth="3.2" android:fillColor="#00000000"
+        android:pathData="M54,41a13,13 0,1 1,0 26a13,13 0,1 1,0 -26z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M54,48.5a5.5,5.5 0,1 1,0 11a5.5,5.5 0,1 1,0 -11z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M71,32a4,4 0,1 1,0 8a4,4 0,1 1,0 -8z" />
+</vector>

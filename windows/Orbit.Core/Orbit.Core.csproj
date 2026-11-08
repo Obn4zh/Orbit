@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Orbit.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!-- The sender web page is shared with the Android TV app. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\shared\web\index.html" LogicalName="web/index.html" />
+    <EmbeddedResource Include="..\..\shared\web\icon.svg" LogicalName="web/icon.svg" />
+    <EmbeddedResource Include="..\..\shared\web\icon.png" LogicalName="web/icon.png" Condition="Exists('..\..\shared\web\icon.png')" />
+  </ItemGroup>
+
+</Project>

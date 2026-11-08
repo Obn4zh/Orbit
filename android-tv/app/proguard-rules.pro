@@ -1,0 +1,12 @@
+# Ktor / coroutines / serialization
+-dontwarn org.slf4j.**
+-dontwarn io.netty.**
+-dontwarn java.lang.management.**
+-dontwarn javax.naming.**
+-dontwarn com.typesafe.config.**
+-keep class io.ktor.server.cio.** { *; }
+-keep class io.ktor.server.engine.** { *; }
+-keepclassmembers class kotlinx.coroutines.** { volatile <fields>; }
+-keepattributes *Annotation*, InnerClasses, Signature
+-keepclassmembers @kotlinx.serialization.Serializable class ** { *** Companion; *** serializer(...); }
+-keep,includedescriptorclasses class app.orbit.tv.**$$serializer { *; }

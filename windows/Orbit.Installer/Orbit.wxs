@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Orbit for Windows — MSI (WiX Toolset v3). Built by tools\build-installer.ps1.
+  Per-machine install into Program Files, Start menu + desktop shortcuts, private-network firewall rule.
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:fw="http://schemas.microsoft.com/wix/FirewallExtension"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+
+  <Product Id="*" Name="Orbit" Language="1033" Version="$(var.Version)" Manufacturer="Orbit"
+           UpgradeCode="7C2E4A51-9B1D-4F6E-8A3C-2D5F0B7E9C14">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" Platform="x64"
+             Description="Orbit — receive files from iPhone over Wi-Fi" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Orbit is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Icon Id="OrbitIcon" SourceFile="$(var.AssetsDir)\orbit.ico" />
+    <Property Id="ARPPRODUCTICON" Value="OrbitIcon" />
+
+    <!-- Close a running Orbit (it lives in the tray) before files are replaced or removed. -->
+    <util:CloseApplication Id="CloseOrbit" Target="Orbit.exe" CloseMessage="yes" TerminateProcess="1" RebootPrompt="no" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLFOLDER" Name="Orbit" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder" />
+      <Directory Id="DesktopFolder" />
+    </Directory>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="OrbitExe" Guid="3E9A6B20-5C4D-4B8E-9F1A-6D2C8E4B7A31" Win64="yes">
+        <File Id="OrbitExeFile" Source="$(var.PublishDir)\Orbit.exe" KeyPath="yes">
+          <!-- Inbound TCP for Orbit only on Private networks and only from the local subnet. -->
+          <fw:FirewallException Id="OrbitFirewall" Name="Orbit (private networks)" Profile="private" Scope="localSubnet" IgnoreFailure="yes" />
+        </File>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="ProgramMenuFolder">
+      <Component Id="StartMenuShortcut" Guid="A1F4C7D2-8E3B-4A65-B9D0-3C7E2F1A8B54" Win64="yes">
+        <Shortcut Id="OrbitStartMenu" Name="Orbit" Description="Receive files from iPhone over Wi-Fi"
+                  Target="[#OrbitExeFile]" WorkingDirectory="INSTALLFOLDER" Icon="OrbitIcon" />
+        <RegistryValue Root="HKLM" Key="Software\Orbit" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="C5B2E8F1-4D7A-4C93-A2E6-9F1B3D5C7E82" Win64="yes">
+        <Condition>INSTALLDESKTOPSHORTCUT</Condition>
+        <Shortcut Id="OrbitDesktop" Name="Orbit" Description="Receive files from iPhone over Wi-Fi"
+                  Target="[#OrbitExeFile]" WorkingDirectory="INSTALLFOLDER" Icon="OrbitIcon" />
+        <RegistryValue Root="HKLM" Key="Software\Orbit" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" />
+
+    <Feature Id="Main" Title="Orbit" Level="1">
+      <ComponentRef Id="OrbitExe" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <!-- Wizard: Welcome → Install folder → Progress → Finish (with "Launch Orbit"). No license page. -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.AssetsDir)\installer-banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.AssetsDir)\installer-dialog.bmp" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Orbit" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Orbit runs in the notification area. Scan its QR code with your iPhone to send files." />
+    <Property Id="WixShellExecTarget" Value="[#OrbitExeFile]" />
+    <CustomAction Id="LaunchOrbit" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+
+    <UI>
+      <UIRef Id="WixUI_InstallDir" />
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchOrbit">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+    </UI>
+  </Product>
+</Wix>

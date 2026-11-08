@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E0F14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F6F7FB" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Orbit">
+<meta name="robots" content="noindex">
+<title>Orbit</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.png">
+<style>
+:root {
+  --bg: #F6F7FB; --surface: #FFFFFF; --surface-2: #EEF0F6; --stroke: rgba(18,19,26,.08);
+  --text: #12131A; --text-2: #5C6275; --text-3: #8A90A2;
+  --accent: #5B5BF6; --accent-2: #22C3EE; --on-accent: #FFFFFF;
+  --success: #12A67A; --danger: #E5484D; --warning: #D98E04;
+  --shadow: 0 1px 2px rgba(18,19,26,.04), 0 8px 24px rgba(18,19,26,.06);
+  --r-sm: 10px; --r-md: 14px; --r-lg: 22px; --r-xl: 28px;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0E0F14; --surface: #171922; --surface-2: #20232F; --stroke: rgba(255,255,255,.07);
+    --text: #F3F4F8; --text-2: #A2A7B8; --text-3: #6E7386;
+    --accent: #7B7BFF; --accent-2: #3FD3F5;
+    --success: #34D399; --danger: #F87171; --warning: #FBBF24;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+  }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font: 16px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; min-height: 100dvh;
+  padding: max(20px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+}
+main { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1, h2, p { margin: 0; }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+.hidden { display: none !important; }
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); pointer-events: none; }
+label.btn { cursor: pointer; user-select: none; -webkit-user-select: none; }
+
+/* Header / device */
+.device { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 12px 0 6px; }
+.orbit { position: relative; width: 132px; height: 132px; margin-bottom: 10px; }
+.orbit .ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid var(--accent); opacity: 0; animation: pulse 3.2s cubic-bezier(.2,.6,.3,1) infinite; }
+.orbit .ring:nth-child(2) { animation-delay: 1.07s; }
+.orbit .ring:nth-child(3) { animation-delay: 2.14s; }
+.orbit .core { position: absolute; inset: 34px; border-radius: 50%; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 45%, transparent); }
+.orbit .core svg { width: 30px; height: 30px; }
+.orbit.off .ring { animation: none; opacity: 0; }
+.orbit.off .core { background: var(--surface-2); color: var(--text-3); box-shadow: none; }
+@keyframes pulse { 0% { transform: scale(.45); opacity: .0; } 15% { opacity: .55; } 100% { transform: scale(1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .orbit .ring { animation: none; opacity: .25; } .orbit .ring:nth-child(2){transform:scale(.75)} .orbit .ring:nth-child(3){transform:scale(.55)} }
+.eyebrow { font-size: 13px; color: var(--text-2); letter-spacing: .01em; }
+.device h1 { font-size: 26px; font-weight: 650; letter-spacing: -.02em; }
+.pill { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 550; padding: 5px 11px; border-radius: 99px; background: var(--surface); border: 1px solid var(--stroke); color: var(--text-2); }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+.pill.warn i { background: var(--warning); } .pill.err i { background: var(--danger); }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--stroke); border-radius: var(--r-xl); box-shadow: var(--shadow); padding: 18px; }
+.picker { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 18px; text-align: center; border-style: dashed; border-width: 1.5px; }
+.picker .glyph { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+.picker h2 { font-size: 18px; font-weight: 620; letter-spacing: -.01em; }
+.picker p { color: var(--text-2); font-size: 14px; max-width: 34ch; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 50px; padding: 0 22px; border-radius: var(--r-md); font-weight: 600; font-size: 16px; transition: transform .12s ease, opacity .2s, background .2s; }
+.btn:active { transform: scale(.98); }
+.btn.primary { background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, var(--accent-2))); color: var(--on-accent); box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); }
+.btn.secondary { background: var(--surface-2); color: var(--text); }
+.btn.ghost { color: var(--accent); height: 40px; padding: 0 10px; font-size: 15px; }
+.btn.block { width: 100%; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+
+/* File list */
+.list { display: flex; flex-direction: column; }
+.list-head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 2px 10px; }
+.list-head h2 { font-size: 17px; font-weight: 620; }
+.list-head span { font-size: 14px; color: var(--text-2); }
+.file { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: 10px 2px; border-top: 1px solid var(--stroke); }
+.file:first-child { border-top: 0; }
+.thumb { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; overflow: hidden; color: var(--text-2); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.fname { font-size: 15px; font-weight: 520; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fmeta { font-size: 13px; color: var(--text-2); }
+.fstate { font-size: 13px; color: var(--text-3); text-align: right; min-width: 52px; }
+.fstate.ok { color: var(--success); } .fstate.bad { color: var(--danger); }
+.remove { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--text-3); }
+.bar { height: 4px; border-radius: 4px; background: var(--surface-2); overflow: hidden; margin-top: 6px; }
+.bar > i { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .25s linear; }
+
+/* Progress */
+.progress { display: flex; flex-direction: column; gap: 14px; }
+.progress .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.progress .big { font-size: 34px; font-weight: 680; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.progress .sub { color: var(--text-2); font-size: 14px; font-variant-numeric: tabular-nums; }
+.progress .bar { height: 8px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { background: var(--surface-2); border-radius: var(--r-md); padding: 10px 12px; }
+.stat b { display: block; font-size: 15px; font-weight: 620; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--text-2); }
+
+/* Banner / states */
+.banner { display: flex; gap: 12px; align-items: flex-start; border-radius: var(--r-lg); padding: 14px 16px; font-size: 14px; background: var(--surface); border: 1px solid var(--stroke); }
+.banner svg { flex: none; width: 20px; height: 20px; margin-top: 1px; }
+.banner.err { color: var(--danger); background: color-mix(in srgb, var(--danger) 9%, var(--surface)); border-color: color-mix(in srgb, var(--danger) 25%, transparent); }
+.banner.info { color: var(--text-2); }
+.banner b { color: var(--text); font-weight: 600; display: block; margin-bottom: 2px; }
+.banner.err b { color: var(--danger); }
+.done { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 30px 18px; }
+.check { width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); animation: pop .5s cubic-bezier(.2,1.4,.4,1); }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.done h2 { font-size: 22px; font-weight: 650; letter-spacing: -.02em; }
+.done p { color: var(--text-2); font-size: 15px; }
+.waiting { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--text-2); }
+.spinner { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid var(--surface-2); border-top-color: var(--accent); animation: spin .8s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Guide */
+details.guide { padding: 0; overflow: hidden; }
+details.guide summary { list-style: none; cursor: pointer; padding: 16px 18px; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 15px; }
+details.guide summary::-webkit-details-marker { display: none; }
+details.guide summary .chev { margin-left: auto; transition: transform .2s; color: var(--text-3); }
+details.guide[open] summary .chev { transform: rotate(90deg); }
+details.guide .body { padding: 0 18px 18px; font-size: 14px; color: var(--text-2); }
+details.guide ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+details.guide b { color: var(--text); font-weight: 600; }
+code, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; }
+.copy { display: flex; gap: 8px; align-items: center; background: var(--surface-2); border-radius: var(--r-sm); padding: 8px 8px 8px 12px; margin: 6px 0; }
+.copy code { flex: 1; overflow-wrap: anywhere; color: var(--text); }
+.copy button { flex: none; font-size: 13px; font-weight: 600; color: var(--accent); padding: 6px 10px; border-radius: 8px; background: var(--surface); }
+.foot { text-align: center; font-size: 12px; color: var(--text-3); padding-top: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <section class="device">
+    <div class="orbit" id="orbit"><div class="ring"></div><div class="ring"></div><div class="ring"></div>
+      <div class="core" id="deviceGlyph"></div></div>
+    <p class="eyebrow">Sending to</p>
+    <h1 id="deviceName">Connecting…</h1>
+    <span class="pill" id="statusPill"><i></i><span id="statusText">Checking connection</span></span>
+  </section>
+
+  <div id="alert" class="banner err hidden" role="alert"></div>
+
+  <!-- 1. Pick -->
+  <section id="pickCard" class="card picker">
+    <div class="glyph"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 14v3a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-3"/></svg></div>
+    <h2>Choose what to send</h2>
+    <p>Photos, videos, documents — any file. Originals are sent as-is, nothing is uploaded to the cloud.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px">
+      <label class="btn primary" for="mediaInput">Photos &amp; Videos</label>
+      <label class="btn secondary" for="fileInput">Files</label>
+    </div>
+    <p id="preparing" class="hidden" style="display:flex;align-items:center;gap:10px"><span class="spinner"></span>Preparing selected items…</p>
+    <p style="font-size:13px;color:var(--text-3);max-width:36ch">Long videos: iOS converts them before the browser can send them, which can take a few minutes. For original quality use the Share Sheet shortcut below, or save to Files first.</p>
+    <!-- Visually hidden, not display:none: iOS may not deliver Photos selections to display:none inputs. -->
+    <input type="file" id="mediaInput" multiple accept="image/*,video/*" class="vh">
+    <input type="file" id="fileInput" multiple class="vh">
+  </section>
+
+  <!-- 2. Review / progress list -->
+  <section id="listCard" class="card list hidden">
+    <div class="list-head"><h2 id="listTitle">Ready to send</h2><span id="listTotal"></span></div>
+    <div id="files"></div>
+  </section>
+
+  <section id="progressCard" class="card progress hidden">
+    <div class="top"><span class="big" id="pctText">0%</span><span class="sub" id="bytesText"></span></div>
+    <div class="bar"><i id="totalBar"></i></div>
+    <div class="stats">
+      <div class="stat"><b id="speedText">—</b><span>Speed</span></div>
+      <div class="stat"><b id="etaText">—</b><span>Time left</span></div>
+      <div class="stat"><b id="countText">0/0</b><span>Files</span></div>
+    </div>
+    <p class="sub">Keep this page open until the transfer finishes.</p>
+  </section>
+
+  <section id="waitCard" class="card hidden"><div class="waiting"><div class="spinner"></div><span id="waitText">Waiting for approval…</span></div></section>
+
+  <section id="doneCard" class="card done hidden">
+    <div class="check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div>
+    <h2 id="doneTitle">Sent</h2>
+    <p id="doneText"></p>
+  </section>
+
+  <div id="actions" class="hidden" style="display:flex;flex-direction:column;gap:10px">
+    <button class="btn primary block" id="sendBtn">Send</button>
+    <button class="btn secondary block" id="secondaryBtn">Add more</button>
+  </div>
+
+  <details class="card guide" id="guide">
+    <summary>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><rect x="4" y="3" width="16" height="18" rx="4"/><path d="M9 12h6M12 9v6"/></svg>
+      Send from the Share Sheet
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="body">
+      <p style="margin-bottom:10px">One-time setup with Apple's <b>Shortcuts</b> app. Afterwards, <b>Orbit</b> appears in the Share Sheet of Photos, Files and other apps, and videos are sent in original quality.</p>
+      <ol>
+        <li>Open <b>Shortcuts</b> → <b>+</b>, name it <b>Orbit</b>. Tap ⓘ → turn on <b>Show in Share Sheet</b>; receive <b>Images, Media, Files</b>.</li>
+        <li>Add <b>Scan QR or Barcode</b>.</li>
+        <li>Add <b>Repeat with Each</b> item in <b>Shortcut Input</b>.</li>
+        <li>Inside the repeat add <b>Get Contents of URL</b>, URL = <b>QR/Barcode</b> (the scan result). Method <b>POST</b>, Request Body <b>Form</b>, field <code>file</code> of type <b>File</b> = <b>Repeat Item</b>.</li>
+      </ol>
+      <p style="margin-top:10px">Then in Photos or Files: Share → <b>Orbit</b> → scan the code on the PC or TV → accept there. The QR link works for uploads as-is. Prefer a fixed device? Use this link instead of scanning:</p>
+      <div class="copy"><code id="shortcutUrl">…</code><button data-copy="shortcutUrl">Copy</button></div>
+    </div>
+  </details>
+
+  <p class="foot">Orbit · direct Wi-Fi transfer on your local network</p>
+</main>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  const KEY_STORE = 'orbit.key';
+  let key = params.get('k') || '';
+  try { if (key) localStorage.setItem(KEY_STORE, key); else key = localStorage.getItem(KEY_STORE) || ''; } catch (_) {}
+
+  const ICONS = {
+    tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 20h8"/></svg>',
+    pc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2.5"/><path d="M9 20h6M12 16v4"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg>',
+    x: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>'
+  };
+
+  const state = { info: null, files: [], phase: 'pick', session: null, sent: 0, startedAt: 0, samples: [] };
+
+  // ---------- helpers ----------
+  const fmtBytes = b => {
+    if (b < 1024) return b + ' B';
+    const u = ['KB','MB','GB','TB']; let i = -1;
+    do { b /= 1024; i++; } while (b >= 1024 && i < u.length - 1);
+    return (b >= 100 ? b.toFixed(0) : b >= 10 ? b.toFixed(1) : b.toFixed(2)) + ' ' + u[i];
+  };
+  const fmtTime = s => {
+    if (!isFinite(s) || s < 0) return '—';
+    s = Math.round(s); if (s < 60) return s + 's';
+    const m = Math.floor(s / 60); if (m < 60) return m + 'm ' + String(s % 60).padStart(2, '0') + 's';
+    return Math.floor(m / 60) + 'h ' + String(m % 60).padStart(2, '0') + 'm';
+  };
+  const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const ext = n => { const i = n.lastIndexOf('.'); return i > 0 ? n.slice(i + 1, i + 5) : 'file'; };
+  const senderName = () => {
+    const ua = navigator.userAgent;
+    if (/iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'iPad';
+    if (/iPhone/.test(ua)) return 'iPhone';
+    if (/Android/.test(ua)) return 'Android phone';
+    if (/Macintosh/.test(ua)) return 'Mac';
+    if (/Windows/.test(ua)) return 'Windows PC';
+    return 'Browser';
+  };
+  const show = (id, on) => $(id).classList.toggle('hidden', !on);
+
+  function alertBox(title, text) {
+    const a = $('alert');
+    if (!title) { a.classList.add('hidden'); return; }
+    a.innerHTML = ICONS.warn + '<div><b>' + esc(title) + '</b>' + esc(text || '') + '</div>';
+    a.classList.remove('hidden');
+  }
+
+  async function api(method, path, body) {
+    const res = await fetch(path, {
+      method, cache: 'no-store',
+      headers: Object.assign({ 'X-Orbit-Key': key }, body ? { 'Content-Type': 'application/json' } : {}),
+      body: body ? JSON.stringify(body) : undefined
+    });
+    let data = null; try { data = await res.json(); } catch (_) {}
+    if (!res.ok) { const e = new Error((data && data.message) || res.statusText); e.status = res.status; e.code = data && data.error; e.data = data; throw e; }
+    return data;
+  }
+
+  const ERRORS = {
+    unauthorized: ['Pairing code expired', 'Scan the QR code on the receiving device again.'],
+    receiving_disabled: ['Receiving is turned off', 'Turn on receiving on the device and try again.'],
+    declined: ['Transfer declined', 'The receiving device declined this transfer.'],
+    expired: ['Request timed out', 'Nobody accepted the transfer on the receiving device.'],
+    insufficient_storage: ['Not enough space', 'The receiving device does not have enough free storage.'],
+    canceled: ['Transfer canceled', 'The transfer was canceled on the receiving device.'],
+    not_local: ['Not on the same network', 'Connect your iPhone to the same Wi-Fi as the receiving device.'],
+    rate_limited: ['Too many attempts', 'Wait a minute and scan the QR code again.'],
+    untrusted_network: ['Receiving is paused on this network', 'The receiving device is on a public or open Wi-Fi network. Use your home network.']
+  };
+  function showError(e) {
+    const m = ERRORS[e && e.code];
+    if (m) alertBox(m[0], m[1]);
+    else alertBox('Connection problem', 'Make sure both devices are on the same Wi-Fi network. ' + (e && e.message ? '(' + e.message + ')' : ''));
+  }
+
+  // ---------- device info ----------
+  async function loadInfo() {
+    try {
+      const info = await api('GET', '/api/v1/info');
+      state.info = info;
+      $('deviceName').textContent = info.name;
+      document.title = 'Send to ' + info.name;
+      document.querySelectorAll('.dn').forEach(n => n.textContent = info.name);
+      $('deviceGlyph').innerHTML = info.platform === 'android-tv' ? ICONS.tv : ICONS.pc;
+      const pill = $('statusPill');
+      pill.className = 'pill' + (info.receiving ? '' : ' warn');
+      $('statusText').textContent = info.receiving ? (info.requiresApproval ? 'Ready · asks to accept' : 'Ready to receive') : 'Receiving is off';
+      $('orbit').classList.toggle('off', !info.receiving);
+      if (!info.receiving) alertBox(ERRORS.receiving_disabled[0], ERRORS.receiving_disabled[1]);
+      else if (state.phase === 'pick') alertBox(null);
+      $('shortcutUrl').textContent = location.origin + '/api/v1/upload?k=' + encodeURIComponent(key);
+    } catch (e) {
+      $('deviceName').textContent = 'Not connected';
+      $('statusPill').className = 'pill err';
+      $('statusText').textContent = e.code === 'unauthorized' ? 'Pairing required' : 'Unreachable';
+      $('deviceGlyph').innerHTML = ICONS.pc; $('orbit').classList.add('off');
+      showError(e);
+    }
+  }
+
+  // ---------- picking ----------
+  // Inputs whose File objects are in use. iOS backs Photos selections with temporary files,
+  // so an input's value is only cleared once its files have been sent or discarded.
+  const usedInputs = new Set();
+  function onPicked(input) {
+    const list = Array.from(input.files || []);
+    show('preparing', false);
+    if (!list.length) return;
+    const seen = new Set(state.files.map(f => f.file));
+    for (const f of list) if (!seen.has(f)) state.files.push({ file: f, name: f.name || 'file', size: f.size, sent: 0, status: 'ready', url: null });
+    usedInputs.add(input);
+    if (state.files.length) setPhase('review');
+  }
+  ['mediaInput', 'fileInput'].forEach(id => {
+    const input = $(id);
+    input.addEventListener('change', () => onPicked(input));
+    input.addEventListener('input', () => onPicked(input));
+  });
+  // Photos can take a while to export (HEIC/video) after tapping "Add"; show that something is happening.
+  document.querySelectorAll('label[for]').forEach(l => l.addEventListener('click', () => {
+    setTimeout(() => show('preparing', true), 400);
+    setTimeout(() => show('preparing', false), 60000);
+  }));
+  window.addEventListener('focus', () => setTimeout(() => {
+    if (!$('mediaInput').files.length && !$('fileInput').files.length) show('preparing', false);
+  }, 1500));
+  window.addEventListener('error', e => alertBox('Something went wrong on this page', String(e.message || e.error)));
+  window.addEventListener('unhandledrejection', e => alertBox('Something went wrong on this page', String(e.reason && e.reason.message || e.reason)));
+
+  function renderFiles() {
+    const box = $('files'); box.innerHTML = '';
+    let total = 0;
+    state.files.forEach((f, i) => {
+      total += f.size;
+      const row = document.createElement('div'); row.className = 'file';
+      let thumb = '<div class="thumb">' + esc(ext(f.name)) + '</div>';
+      if (f.file.type.startsWith('image/') && f.size < 40e6) {
+        if (!f.url) f.url = URL.createObjectURL(f.file);
+        thumb = '<div class="thumb"><img alt="" src="' + f.url + '"></div>';
+      }
+      let right = '';
+      if (state.phase === 'review') right = '<button class="remove" aria-label="Remove" data-i="' + i + '">' + ICONS.x + '</button>';
+      else if (f.status === 'done') right = '<span class="fstate ok">Done</span>';
+      else if (f.status === 'failed') right = '<span class="fstate bad">Failed</span>';
+      else if (f.status === 'sending') right = '<span class="fstate">' + Math.floor(f.sent / Math.max(f.size, 1) * 100) + '%</span>';
+      else right = '<span class="fstate">Waiting</span>';
+      const bar = state.phase === 'sending' && f.status === 'sending' ? '<div class="bar"><i style="width:' + (f.sent / Math.max(f.size, 1) * 100) + '%"></i></div>' : '';
+      row.innerHTML = thumb + '<div style="min-width:0"><div class="fname">' + esc(f.name) + '</div><div class="fmeta">' + fmtBytes(f.size) + '</div>' + bar + '</div>' + right;
+      box.appendChild(row);
+    });
+    box.querySelectorAll('.remove').forEach(b => b.onclick = () => {
+      const f = state.files.splice(+b.dataset.i, 1)[0]; if (f.url) URL.revokeObjectURL(f.url);
+      setPhase(state.files.length ? 'review' : 'pick');
+    });
+    $('listTotal').textContent = state.files.length + (state.files.length === 1 ? ' item · ' : ' items · ') + fmtBytes(total);
+  }
+
+  function setPhase(p) {
+    state.phase = p;
+    show('pickCard', p === 'pick');
+    show('listCard', p === 'review' || p === 'sending' || p === 'waiting');
+    show('progressCard', p === 'sending');
+    show('waitCard', p === 'waiting');
+    show('doneCard', p === 'done');
+    show('actions', p === 'review' || p === 'done');
+    $('listTitle').textContent = p === 'review' ? 'Ready to send' : p === 'waiting' ? 'Waiting' : 'Sending';
+    if (p === 'review') { $('sendBtn').classList.remove('hidden'); $('sendBtn').textContent = 'Send ' + (state.files.length > 1 ? state.files.length + ' items' : '1 item'); $('secondaryBtn').textContent = 'Add more'; }
+    if (p === 'done') { $('sendBtn').classList.add('hidden'); $('secondaryBtn').textContent = 'Send more'; }
+    if (p !== 'pick') renderFiles();
+  }
+
+  function resetSelection() {
+    state.files.forEach(f => f.url && URL.revokeObjectURL(f.url));
+    state.files = [];
+    usedInputs.forEach(i => { try { i.value = ''; } catch (_) {} });
+    usedInputs.clear();
+    alertBox(null);
+  }
+  // "Add more" / "Send more" go back to the picker card, which offers both Photos and Files.
+  $('secondaryBtn').onclick = () => {
+    if (state.phase === 'done') resetSelection();
+    show('pickCard', true);
+    $('pickCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  $('sendBtn').onclick = () => send().catch(e => { releaseWake(); showError(e); setPhase('review'); });
+
+  // ---------- wake lock (keeps iOS from sleeping mid-transfer) ----------
+  let wake = null;
+  async function holdWake() { try { if ('wakeLock' in navigator) wake = await navigator.wakeLock.request('screen'); } catch (_) {} }
+  function releaseWake() { try { wake && wake.release(); } catch (_) {} wake = null; }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && state.phase === 'sending') holdWake(); });
+  window.addEventListener('beforeunload', e => { if (state.phase === 'sending') { e.preventDefault(); e.returnValue = ''; } });
+
+  // ---------- sending ----------
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function send() {
+    alertBox(null);
+    const files = state.files;
+    const created = await api('POST', '/api/v1/sessions', {
+      sender: senderName(),
+      files: files.map(f => ({ name: f.name, size: f.size, type: f.file.type || '' }))
+    });
+    state.session = created.sessionId;
+    let st = created;
+    if (st.status === 'pending') {
+      setPhase('waiting');
+      $('waitText').textContent = 'Waiting for ' + (state.info ? state.info.name : 'the device') + ' to accept…';
+      while (st.status === 'pending') { await sleep(1000); st = await api('GET', '/api/v1/sessions/' + state.session); }
+    }
+    if (st.status !== 'accepted' && st.status !== 'active') { const e = new Error(st.status); e.code = st.status; throw e; }
+
+    setPhase('sending'); await holdWake();
+    state.startedAt = performance.now(); state.samples = []; state.sent = 0;
+    const ticker = setInterval(updateProgress, 250);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i]; f.status = 'sending'; renderFiles();
+        await uploadWithRetry(i, f);
+        f.status = 'done'; f.sent = f.size; renderFiles();
+      }
+    } catch (e) {
+      files.forEach(f => { if (f.status === 'sending') f.status = 'failed'; });
+      throw e;
+    } finally { clearInterval(ticker); updateProgress(); releaseWake(); }
+    const total = files.reduce((a, f) => a + f.size, 0);
+    $('doneTitle').textContent = files.length > 1 ? files.length + ' items sent' : 'Sent';
+    $('doneText').textContent = fmtBytes(total) + ' delivered to ' + (state.info ? state.info.name : 'the device') + ' in ' + fmtTime((performance.now() - state.startedAt) / 1000) + '.';
+    setPhase('done');
+  }
+
+  async function uploadWithRetry(index, f) {
+    let attempt = 0;
+    for (;;) {
+      let offset = 0;
+      try {
+        if (attempt > 0) {
+          const s = await api('GET', '/api/v1/sessions/' + state.session + '/files/' + index);
+          if (s.status === 'done') return;
+          if (s.status === 'canceled') { const e = new Error('canceled'); e.code = 'canceled'; throw e; }
+          offset = s.received;
+        }
+        await putFile(index, f, offset);
+        return;
+      } catch (e) {
+        if (e.code && e.code !== 'offset_mismatch' && e.code !== 'network') throw e;
+        if (++attempt > 6) throw e;
+        $('speedText').textContent = 'Retrying';
+        await sleep(Math.min(1000 * attempt, 5000));
+      }
+    }
+  }
+
+  function putFile(index, f, offset) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', '/api/v1/sessions/' + state.session + '/files/' + index + '?offset=' + offset);
+      xhr.setRequestHeader('X-Orbit-Key', key);
+      xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+      const base = offset;
+      xhr.upload.onprogress = ev => { f.sent = base + ev.loaded; };
+      xhr.onload = () => {
+        let data = null; try { data = JSON.parse(xhr.responseText); } catch (_) {}
+        if (xhr.status >= 200 && xhr.status < 300) resolve(data);
+        else { const e = new Error((data && data.message) || ('HTTP ' + xhr.status)); e.code = (data && data.error) || 'http_' + xhr.status; reject(e); }
+      };
+      xhr.onerror = xhr.ontimeout = () => { const e = new Error('Network connection lost'); e.code = 'network'; reject(e); };
+      xhr.send(offset > 0 ? f.file.slice(offset) : f.file);
+    });
+  }
+
+  function updateProgress() {
+    const files = state.files;
+    const total = files.reduce((a, f) => a + f.size, 0) || 1;
+    const sent = files.reduce((a, f) => a + Math.min(f.sent, f.size), 0);
+    const now = performance.now();
+    state.samples.push([now, sent]);
+    while (state.samples.length > 2 && now - state.samples[0][0] > 3000) state.samples.shift();
+    const [t0, b0] = state.samples[0];
+    const speed = now - t0 > 300 ? (sent - b0) / ((now - t0) / 1000) : 0;
+    const pct = Math.floor(sent / total * 100);
+    $('pctText').textContent = pct + '%';
+    $('totalBar').style.width = (sent / total * 100) + '%';
+    $('bytesText').textContent = fmtBytes(sent) + ' of ' + fmtBytes(total);
+    if ($('speedText').textContent !== 'Retrying' || speed > 0) $('speedText').textContent = speed > 0 ? fmtBytes(speed) + '/s' : '—';
+    $('etaText').textContent = speed > 0 ? fmtTime((total - sent) / speed) : '—';
+    $('countText').textContent = files.filter(f => f.status === 'done').length + '/' + files.length;
+    files.forEach((f, i) => {
+      if (f.status !== 'sending') return;
+      const row = $('files').children[i]; if (!row) return;
+      const bar = row.querySelector('.bar > i'); if (bar) bar.style.width = (f.sent / Math.max(f.size, 1) * 100) + '%';
+      const st = row.querySelector('.fstate'); if (st) st.textContent = Math.floor(f.sent / Math.max(f.size, 1) * 100) + '%';
+    });
+  }
+
+  // ---------- misc ----------
+  document.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => {
+    const text = $(b.dataset.copy).textContent;
+    try { await navigator.clipboard.writeText(text); b.textContent = 'Copied'; }
+    catch (_) { const r = document.createRange(); r.selectNodeContents($(b.dataset.copy)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+    setTimeout(() => b.textContent = 'Copy', 1600);
+  });
+
+  loadInfo();
+  setInterval(() => { if (state.phase === 'pick' || state.phase === 'review') loadInfo(); }, 5000);
+})();
+</script>
+</body>
+</html>

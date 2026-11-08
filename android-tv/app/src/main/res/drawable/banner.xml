@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 320x180 leanback launcher banner: brand gradient with the Orbit mark. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="320dp" android:height="180dp">
+        <shape android:shape="rectangle">
+            <gradient android:angle="0" android:startColor="#3F3FD8" android:centerColor="#5B5BF6" android:endColor="#22C3EE" />
+        </shape>
+    </item>
+    <item android:width="320dp" android:height="180dp" android:drawable="@drawable/banner_fg" />
+</layer-list>
